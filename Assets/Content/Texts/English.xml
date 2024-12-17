@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<infotexts language="English" nowhitespace="true" translatedname="English">
+    <!--Most texts are taken from basegame but there are some that are better off being custom hence why this exists -->
+    <!-- Round results. -->
+    <traumaticpresence.roundsummaryprogress>Made it to [location].</traumaticpresence.roundsummaryprogress>
+    <traumaticpresence.roundsummaryprogress>Arrived at [location].</traumaticpresence.roundsummaryprogress>
+    <traumaticpresence.roundsummaryreturn>Returned to [location].</traumaticpresence.roundsummaryreturn>
+    <traumaticpresence.roundsummarygameover>The ocean has claimed [sub] and its crew.</traumaticpresence.roundsummarygameover>
+    <traumaticpresence.roundsummaryroundhasended>The round has ended.</traumaticpresence.roundsummaryroundhasended>
+    <traumaticpresence.roundsummaryleaving>Departing from [location].</traumaticpresence.roundsummaryleaving>
+    <traumaticpresence.roundsummaryprogresstoemptylocation>Made it through [location].</traumaticpresence.roundsummaryprogresstoemptylocation>
+    <traumaticpresence.roundsummaryreturntoemptylocation>Returning back through [location].</traumaticpresence.roundsummaryreturntoemptylocation>
+    <traumaticpresence.roundsummarycasualties>Casualties: [casualties]</traumaticpresence.roundsummarycasualties>
+    <!-- Location -->
+    <traumaticpresence.atoutpost>At [outpost] | [biome]</traumaticpresence.atoutpost>
+    <!-- Generic -->
+    <traumaticpresence.subeditorstatus>In the sub editor.</traumaticpresence.subeditorstatus>
+    <traumaticpresence.inserverlobby>In Server Lobby.</traumaticpresence.inserverlobby>
+    <traumaticpresence.inmenu>Deciding what to do...</traumaticpresence.inmenu>
+    <traumaticpresence.spectating>Spectating.</traumaticpresence.spectating>
+    <traumaticpresence.fightingdetails>Fighting [boss] | [vitality]HP.</traumaticpresence.fightingdetails>
+    <traumaticpresence.causeofdeath>Cause Of Death: [causeofdeath]</traumaticpresence.causeofdeath>
+    <!-- PVP -->
+    <traumaticpresence.subvsub>[sub1] VS [sub2]</traumaticpresence.subvsub>
+    <traumaticpresence.pvpscore>[team1]: [team1score] | [team2]: [team2score]</traumaticpresence.pvpscore>
+</infotexts>

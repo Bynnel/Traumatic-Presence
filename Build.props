@@ -1,0 +1,9 @@
+<Project>
+    <PropertyGroup>
+        <!-- IMPORTANT: Should point to <Barotrauma_Install>\LocalMods\<MyModName>\ -->
+        <!-- IMPORTANT: ModDeplyDir Path must end with '\' -->
+        <ModDeployDir>E:\BarotraumaModding\LuaCsForBarotrauma\Barotrauma\bin\DebugWindows\net6.0\LocalMods\Traumatic Presence\</ModDeployDir>
+        <!-- IMPORTANT: Avoid the use of special (IE: / : ; , \ < > ?) (periods "." are good) and non-english characters in the AssemblyName.-->
+        <AssemblyName>TraumaticPresence</AssemblyName>
+    </PropertyGroup>
+</Project>
