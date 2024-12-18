@@ -6,13 +6,14 @@ using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
 using Barotrauma;
+using Barotrauma.Networking;
 using HarmonyLib;
 
 namespace TraumaticPresence
 {
     public partial class Plugin : IAssemblyPlugin
     {
-        readonly Harmony harmony = new Harmony("lenny.barotrauma.discordrpc");
+        static readonly Harmony harmony = new Harmony("lenny.barotrauma.discordrpc");
         public void Initialize()
         {
             // When your plugin is loading, use this instead of the constructor
@@ -29,7 +30,7 @@ namespace TraumaticPresence
 
         public void PreInitPatching()
         {
-            // Not yet supported: Called during the Barotrauma startup phase before vanilla content is loaded.
+            harmony.PatchAll();
         }
 
         public void Dispose()
@@ -38,6 +39,7 @@ namespace TraumaticPresence
             DebugConsole.NewMessage("Dispose() has been called.");
             RpcClient.Dispose();
             Timer.Dispose();
+            harmony.UnpatchAll("lenny.barotrauma.discordrpc");
             //throw new NotImplementedException();
         }
     }

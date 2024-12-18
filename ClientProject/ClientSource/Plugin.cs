@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using Barotrauma;
 using Barotrauma.Networking;
 using Barotrauma.Steam;
@@ -52,7 +53,6 @@ public partial class Plugin : IAssemblyPlugin
         SetBaseRPC();
         InitEventSubscriptions();
         InitLuaHooks();
-        InitHarmonyPatches();
         DebugConsole.NewMessage("Calls have been made. Init's job is complete.", Color.Cyan);
     }
 
@@ -61,25 +61,6 @@ public partial class Plugin : IAssemblyPlugin
     /// </summary>
     public static void InitLuaHooks()
     {
-        //Do these client connect/disconnect hooks even work?
-        /*GameMain.LuaCs.Hook.Add("clientConnected", "rpcClientConnected", (args) => {
-            DebugConsole.NewMessage("Client connected. Updating party info", Color.Cyan);
-            //RpcClient.UpdatePartySize(PlayerCount(), MaxPlayerCount());
-            UpdateMidroundPartySize();
-            return null;
-        });
-        GameMain.LuaCs.Hook.Add("clientDisconnected", "rpcClientDisconnected", (args) => {
-            DebugConsole.NewMessage("Client disconnected. Updating party info", Color.Cyan);
-            //RpcClient.UpdatePartySize(PlayerCount(), MaxPlayerCount());
-            UpdateMidroundPartySize();
-            return null;
-        });*/ //TODO: Create an alternative to these hooks as they seem to be serverside only.
-        GameMain.LuaCs.Hook.Add("loaded", "rpcModsLoaded", args =>
-        {
-            DebugConsole.NewMessage("Loaded hook called", Color.Cyan);
-            SetBaseParty();
-            return null;
-        });
         GameMain.LuaCs.Hook.Add("roundEnd", "rpcRoundEnded", args =>
         {
             DebugConsole.NewMessage("Round has ended", Color.Cyan);
@@ -198,42 +179,107 @@ public partial class Plugin : IAssemblyPlugin
     }
 
     /// <summary>
-    ///     Initializes harmony patches
+    ///     Harmony postfixes used as hooks.
     /// </summary>
-    public void InitHarmonyPatches()
+    private class HarmonyPatches
     {
-        // Postfix patch for the Controlled property setter.
-        // Responsible for character RPC.
-        // We cannot use the roundstart hook because it fires too early. gotta make do with this instead.
-        harmony.Patch(
-            typeof(Character).GetProperty(nameof(Character.Controlled)).GetSetMethod(),
-            null,
-            new HarmonyMethod(typeof(CharacterRPC).GetMethod(nameof(CharacterRPC.RPC_CharacterControlled))));
+        // Responsible for Character RPC
+        [HarmonyPatch(typeof(Character))]
+        [HarmonyPatch("set_Controlled")]
+        private class Patch_CharacterControlled
+        {
+            [HarmonyPostfix]
+            private static void Postfix(Character value)
+            {
+                CharacterRPC.RPC_CharacterControlled(value);
+            }
+        }
 
-        // These 2 are responsible for the bossfight loop
-        harmony.Patch(
-            typeof(CharacterHUD).GetMethod(nameof(ShowBossHealthBar)),
-            null,
-            new HarmonyMethod(typeof(BossFight).GetMethod(nameof(BossFight.RPC_OnBossDamaged))));
+        // Responsible for boss encounters.
+        [HarmonyPatch(typeof(CharacterHUD))]
+        [HarmonyPatch(nameof(ShowBossHealthBar))]
+        private class Patch_ShowBossHealthBar
+        {
+            [HarmonyPostfix]
+            private static void Postfix(Character character, float damage)
+            {
+                if (character == null) return;
+                BossFight.RPC_OnBossDamaged(character, damage);
+            }
+        }
 
-        harmony.Patch(
-            typeof(CharacterHUD).GetMethod(nameof(UpdateBossProgressBars)),
-            null,
-            new HarmonyMethod(typeof(BossFight).GetMethod(nameof(BossFight.RPC_OnBossBarUpdated))));
+        // Also responsible for encounters
+        [HarmonyPatch(typeof(CharacterHUD))]
+        [HarmonyPatch(nameof(UpdateBossProgressBars))]
+        [HarmonyPatch(typeof(CharacterHUD))]
+        [HarmonyPatch(nameof(UpdateBossProgressBars))]
+        private class Patch_UpdateBossProgressBars
+        {
+            [HarmonyPostfix]
+            private static void Postfix(float deltaTime)
+            {
+                BossFight.RPC_OnBossBarUpdated(deltaTime);
+            }
+        }
 
-        //LuaCS character.death alternative that only seems to fire when controlled character dies
+        // Death.
+        [HarmonyPatch(typeof(RespawnManager))]
+        [HarmonyPatch(nameof(RespawnManager.ShowDeathPromptIfNeeded))]
+        private class Patch_CharacterKilled
+        {
+            [HarmonyPostfix]
+            private static void Postfix()
+            {
+                CharacterRPC.RPC_OnCharacterKilled();
+            }
+        }
+
+        // Late-calling problematic patches and methods.
+        [HarmonyPatch(typeof(NetLobbyScreen))]
+        [HarmonyPatch(nameof(NetLobbyScreen.AddToGUIUpdateList))]
+        private class Patch_NetLobbyScreen_AddToGUIUpdateList
+        {
+            private static bool isInitialized;
+
+            [HarmonyPostfix]
+            private static void Postfix()
+            {
+                if (isInitialized) return;
+                isInitialized = true;
+                DebugConsole.NewMessage("AddToGUIUpdateList Called.", Color.DodgerBlue);
+                InitLateHarmonyPatches();
+                SetBaseParty();
+                //Don't need it anymore.
+                DebugConsole.NewMessage("Unpatching NetLobbyScreen.AddToGUIUpdateList", Color.OrangeRed);
+                harmony.Unpatch(typeof(NetLobbyScreen).GetMethod(nameof(NetLobbyScreen.AddToGUIUpdateList)),
+                    HarmonyPatchType.Postfix);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Initializes patches that can only be applied while fully loaded in
+    /// </summary>
+    public static void InitLateHarmonyPatches()
+    {
         harmony.Patch(
-            typeof(RespawnManager).GetMethod(nameof(RespawnManager.ShowDeathPromptIfNeeded)),
+            typeof(GameClient).GetMethod(nameof(GameClient.ReadClientList),
+                BindingFlags.NonPublic | BindingFlags.Instance),
             null,
-            new HarmonyMethod(typeof(CharacterRPC).GetMethod(nameof(CharacterRPC.RPC_OnCharacterKilled)))
+            new HarmonyMethod(typeof(Plugin).GetMethod(nameof(RPC_ClientListRead)))
         );
+    }
+
+    public static void RPC_ClientListRead()
+    {
+        DebugConsole.NewMessage("ReadClientListPostfix Called. Updating party.", Color.DodgerBlue);
+        UpdateMidroundPartySize();
     }
 
     public static void InitEventSubscriptions()
     {
         SteamMatchmaking.OnLobbyEntered += SteamPresence.GetJoinedSteamLobby;
     }
-
 
     /// <summary>
     ///     Creates the base Discord RPC Object that should be used throughout the code.
@@ -290,16 +336,7 @@ public partial class Plugin : IAssemblyPlugin
                         Color.Red);
                     RpcClient.Initialize();
                     RpcClient.UpdateParty(_discordPartyObject);
-                    //TODO: While I still remember what happened, figure out why the State string didn't get set and it ended up displaying as (blank)(2/4)
                 }
-            }
-            // This works for now but there might be a better way to do this. TODO: Consider finding or making a hook just for such occasions
-            else if (GameMain.Client.ServerSettings.maxPlayers == 0)
-            {
-                DebugConsole.NewMessage(
-                    "maxplayers is 0 which is most likely incorrect and is a result of the method getting called too early. Retrying.",
-                    Color.Sienna);
-                Timer.Start(SetBaseParty, 1000);
             }
         }
     }
@@ -523,6 +560,11 @@ public partial class Plugin : IAssemblyPlugin
 
         public static class MultiplayerData
         {
+            public static void RPC_PlayerListUpdated()
+            {
+                DebugConsole.NewMessage("Hook called", Color.DodgerBlue);
+            }
+
             public static int PlayerCount()
             {
                 return GameMain.IsMultiplayer ? GameMain.Client.ConnectedClients.Count() : 1;
@@ -534,10 +576,8 @@ public partial class Plugin : IAssemblyPlugin
                 {
                     if (GameMain.Client.ServerSettings.maxPlayers == 0)
                     {
-                        DebugConsole.NewMessage(
-                            "MaxPlayerCount called too early. Retrying"); //TODO: Write retry functionality
-                        return GameMain.Client.ServerSettings
-                            .MaxPlayers; //I can't believe that this actually DOESN'T return 0 all the time.
+                        DebugConsole.NewMessage("MaxPlayerCount was called too early. Game's returning 0.");
+                        return GameMain.Client.ServerSettings.MaxPlayers;
                     }
 
                     return GameMain.Client.ServerSettings.MaxPlayers;
