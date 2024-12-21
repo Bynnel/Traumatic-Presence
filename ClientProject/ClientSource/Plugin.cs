@@ -804,13 +804,32 @@ public partial class Plugin : IAssemblyPlugin
             DebugConsole.NewMessage($"Job ID value is: {Character.controlled.JobIdentifier.Value}", Color.BlueViolet);
             var moddedJobs = new Dictionary<string, string>
             {
+                // Some idents are renamed for consistency or because they differ a lot from their actual name
+                // Hungry Europans
                 { "he-chef", "he-chef" },
+                // NT addons
                 { "surgeon", "surgeon" },
                 { "swedic", "swedic" },
+                // Husk Acolyte
                 { "acolyte", "acolyte" },
+                // Scientist job
                 { "v_scientist", "v_scientist" },
-                //TODO: Populate the list
-                { "PlayerMudraptorJob", "mudraptorjob" }
+                // Playable mudraptor (most of them, hopefully. There's an unsettling amount of mudraptor mods.)
+                { "PlayerMudraptorJob", "mudraptorjob" },
+                // JobsExtended
+                { "chief", "chief_boat"},
+                { "executive_officer", "executive_officer" },
+                { "navigator", "navigator"},
+                { "quartermaster", "quartermaster"},
+                { "head_of_security", "head_of_security"}, // space station 13 real
+                { "chiefmedicaldoctor", "chief_medical_doctor"},
+                { "passenger", "passenger"},
+                { "janitor", "janitor"},
+                { "inmate", "je_prisoner"},
+                // MedievalTrauma
+                { "vagabond", "vagabond"},
+                // Hunter's Husk
+                { "PlayerHuskJob", "husk_job"},
             };
             if (moddedJobs.TryGetValue(Character.controlled.JobIdentifier.value, out var icon))
             {
