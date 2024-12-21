@@ -64,7 +64,7 @@ public partial class Plugin : IAssemblyPlugin
         GameMain.LuaCs.Hook.Add("roundEnd", "rpcRoundEnded", args =>
         {
             DebugConsole.NewMessage("Round has ended", Color.Cyan);
-            //int casualtyCount = GameMain.gameSession.Casualties.Count();
+            int casualtyCount = GameMain.gameSession.Casualties.Count();
 
             //Based off RoundSummary.cs
             LocalizedString subName = string.Empty;
@@ -141,11 +141,28 @@ public partial class Plugin : IAssemblyPlugin
                     DebugConsole.NewMessage(
                         $"{TextManager.GetWithVariables(textTag, ("[sub]", subName), ("[location]", locationName))}",
                         Color.DodgerBlue);
-                    _discordPresenceObject.Details = TextManager
-                        .GetWithVariables(textTag, ("[sub]", subName), ("[location]", locationName)!)
-                        .Fallback(TextManager.GetWithVariables(
-                            textTag.Replace("traumaticpresence.", ""), ("[sub]", subName),
-                            ("[location]", locationName)!), false).ToString();
+                    _discordPresenceObject.Details = casualtyCount > 0
+                        ? TextManager
+                              .GetWithVariables(textTag, ("[sub]", subName), ("[location]", locationName)!)
+                              .Fallback(TextManager.GetWithVariables(
+                                  textTag.Replace("traumaticpresence.", ""), ("[sub]", subName),
+                                  ("[location]", locationName)!), false).ToString() + " " +
+                          TextManager.GetWithVariables("traumaticpresence.roundsummarycasualties",
+                              ("[casualties]", casualtyCount.ToString())).ToString()
+                        : TextManager
+                            .GetWithVariables(textTag, ("[sub]", subName), ("[location]", locationName)!)
+                            .Fallback(TextManager.GetWithVariables(
+                                textTag.Replace("traumaticpresence.", ""), ("[sub]", subName),
+                                ("[location]", locationName)!), false).ToString();
+                }
+                else
+                {
+                    _discordPresenceObject.Details = casualtyCount > 0
+                        ? TextManager.Get("traumaticpresence.RoundSummaryRoundHasEnded")
+                              .Fallback(TextManager.Get("RoundSummaryRoundHasEnded")).ToString() + " " +
+                          TextManager.GetWithVariables("traumaticpresence.roundsummarycasualties", ("[casualties]", casualtyCount.ToString())).ToString()
+                        : TextManager.Get("traumaticpresence.RoundSummaryRoundHasEnded")
+                            .Fallback(TextManager.Get("RoundSummaryRoundHasEnded")).ToString();
                 }
             }
 
