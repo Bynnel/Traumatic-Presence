@@ -35,7 +35,6 @@ public partial class Plugin : IAssemblyPlugin
     /// </summary>
     public void InitClient()
     {
-        DebugConsole.NewMessage("BaroRPC's loading...", Color.Cyan);
         RpcClient = new DiscordRpcClient("1274111447323906088");
         RpcClient.SkipIdenticalPresence =
             true; //idk if this is true or false by default so i'll just set it to true here.
@@ -53,7 +52,7 @@ public partial class Plugin : IAssemblyPlugin
         SetBaseRPC();
         InitEventSubscriptions();
         InitLuaHooks();
-        DebugConsole.NewMessage("Calls have been made. Init's job is complete.", Color.Cyan);
+        DebugConsole.NewMessage("Traumatic Presence has been loaded", Color.DodgerBlue);
     }
 
     /// <summary>
@@ -289,7 +288,6 @@ public partial class Plugin : IAssemblyPlugin
 
     public static void RPC_ClientListRead()
     {
-        DebugConsole.NewMessage("ReadClientListPostfix Called. Updating party.", Color.DodgerBlue);
         UpdateMidroundPartySize();
     }
 
@@ -834,28 +832,26 @@ public partial class Plugin : IAssemblyPlugin
                 // Playable mudraptor (most of them, hopefully. There's an unsettling amount of mudraptor mods.)
                 { "PlayerMudraptorJob", "mudraptorjob" },
                 // JobsExtended
-                { "chief", "chief_boat"},
+                { "chief", "chief_of_the_boat"},
                 { "executive_officer", "executive_officer" },
                 { "navigator", "navigator"},
                 { "quartermaster", "quartermaster"},
                 { "head_of_security", "head_of_security"}, // space station 13 real
                 { "chiefmedicaldoctor", "chief_medical_doctor"},
                 { "passenger", "passenger"},
-                { "janitor", "janitor"},
                 { "inmate", "je_prisoner"},
+                { "janitor", "je_janitor"},
                 // MedievalTrauma
                 { "vagabond", "vagabond"},
                 // Hunter's Husk
-                { "PlayerHuskJob", "husk_job"},
+                { "PlayerHuskJob", "huskjob"},
             };
             if (moddedJobs.TryGetValue(Character.controlled.JobIdentifier.value, out var icon))
             {
-                DebugConsole.NewMessage("Found a match in the dictionary. Setting the corresponding icon.",
-                    Color.BlueViolet);
                 return icon;
             }
 
-            DebugConsole.NewMessage("We don't have a match. Setting to unknown-role", Color.OrangeRed);
+            DebugConsole.NewMessage($"Couldn't find an icon for job ID {Character.controlled.JobIdentifier.value}. Falling back to generic icon.", Color.OrangeRed);
             return "unknown-role";
         }
 
