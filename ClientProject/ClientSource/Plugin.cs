@@ -167,7 +167,7 @@ public partial class Plugin : IAssemblyPlugin
 
             Timer.Dispose();
             _discordPresenceObject.Assets.SmallImageKey = string.Empty; //Hiding missions icon since the round is over.
-            SetMidroundRPC();
+            UpdateRichPresence();
             return null;
         });
         GameMain.LuaCs.Hook.Add("roundStart", "rpcRoundStarted", args =>
@@ -188,7 +188,7 @@ public partial class Plugin : IAssemblyPlugin
 
             _discordPresenceObject.Assets.SmallImageKey = Getters.MissionIcon();
             _discordPresenceObject.Assets.SmallImageText = Getters.MissionList;
-            SetMidroundRPC();
+            UpdateRichPresence();
             UpdateMidroundPartySize();
             return null;
         });
@@ -320,7 +320,7 @@ public partial class Plugin : IAssemblyPlugin
             _discordPresenceObject.State = TextManager.Get("traumaticpresence.inmenu")
                 .Fallback(TextManager.Get("pausemenuquit"), false).ToString();
         ;
-        SetMidroundRPC();
+        UpdateRichPresence();
     }
 
     /// <summary>
@@ -358,11 +358,10 @@ public partial class Plugin : IAssemblyPlugin
 
     /// <summary>
     ///     Sets mid-round presence data. Call this to update the rpc in a centralized manner.
-    ///     It's not really mid-round anymore. TODO: Find a more fitting name for this method later.
+    ///     It's not really mid-round anymore.
     /// </summary>
-    public static void SetMidroundRPC()
+    public static void UpdateRichPresence()
     {
-        DebugConsole.NewMessage("Setting midround RPC", Color.DeepPink);
         if (_discordPresenceObject.Details is { Length: > 128 })
         {
             DebugConsole.NewMessage("Details are too long. Trimming.", Color.DeepPink);
@@ -382,7 +381,7 @@ public partial class Plugin : IAssemblyPlugin
         catch (Exception ex)
         {
             DebugConsole.NewMessage(
-                $"SetMidroundRPC error. IPC probably got killed again. \n {ex.Message} \n Recreating RPC...",
+                $"UpdateRichPresenceUpdateRichPresence error. IPC probably got killed again. \n {ex.Message} \n Recreating RPC...",
                 Color.LightPink);
             RpcClient = new DiscordRpcClient("1274111447323906088");
             RpcClient.SetPresence(_discordPresenceObject);
@@ -670,7 +669,7 @@ public partial class Plugin : IAssemblyPlugin
                         Color.Orange);
                     IsBossDealtWith = true;
                     CheckRoundDetails();
-                    SetMidroundRPC();
+                    UpdateRichPresence();
                     break;
             }
         }
@@ -683,7 +682,7 @@ public partial class Plugin : IAssemblyPlugin
             _discordPresenceObject.Details = TextManager
                 .GetWithVariables("traumaticpresence.fightingdetails", ("[boss]", bossName), ("[vitality]", bossHealth))
                 .Fallback($"{bossName} | {bossHealth}").ToString();
-            SetMidroundRPC();
+            UpdateRichPresence();
         }
 
         public static void RPC_OnBossBarUpdated(float deltaTime)
@@ -694,7 +693,7 @@ public partial class Plugin : IAssemblyPlugin
                 IsBossDealtWith = true;
                 DebugConsole.NewMessage("Boss has either been killed or evaded(Interrupted).", Color.OrangeRed);
                 CheckRoundDetails();
-                SetMidroundRPC();
+                UpdateRichPresence();
             }
             //Note: ClearBossProgressBars() method gets called on endround, not when the health bars fade away.
         }
@@ -717,7 +716,7 @@ public partial class Plugin : IAssemblyPlugin
                     _discordPresenceObject.Details = TextManager.GetWithVariables("traumaticpresence.pvpScore",
                         ("[team1]", CombatMission.teamNames[0]), ("[team1score]", team1Score.ToString()),
                         ("[team2]", CombatMission.teamNames[1]), ("[team2score]", team2Score.ToString())).ToString();
-                    SetMidroundRPC();
+                    UpdateRichPresence();
                 }
 
             Timer.Start(Scoreable, 5000);
@@ -737,7 +736,7 @@ public partial class Plugin : IAssemblyPlugin
                         .Fallback(
                             $"{combatMission.subs.First().Info.DisplayName} VS {combatMission.subs.Last().Info.DisplayName}")
                         .ToString();
-                    SetMidroundRPC();
+                    UpdateRichPresence();
                 }
         }
     }
@@ -761,7 +760,7 @@ public partial class Plugin : IAssemblyPlugin
                 _discordPresenceObject.Assets.LargeImageText = TextManager
                     .GetWithVariables("traumaticpresence.causeofdeath", ("[causeofdeath]", CauseOfDeath()))
                     .Fallback($"{TextManager.Get("CauseOfDeath")}: {CauseOfDeath()}").ToString();
-                SetMidroundRPC();
+                UpdateRichPresence();
             }
         }
 
@@ -908,7 +907,7 @@ public partial class Plugin : IAssemblyPlugin
                             }
                         }
 
-                    SetMidroundRPC();
+                    UpdateRichPresence();
                 }
                 else
                 {
