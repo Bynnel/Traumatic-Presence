@@ -63,8 +63,8 @@ public partial class Plugin : IAssemblyPlugin
         GameMain.LuaCs.Hook.Add("roundEnd", "rpcRoundEnded", args =>
         {
             DebugConsole.NewMessage("Round has ended", Color.Cyan);
+            if (Getters.Biome() == String.Empty) return null; // Band-aid sub editor detection #2
             int casualtyCount = GameMain.gameSession.Casualties.Count();
-
             //Based off RoundSummary.cs
             LocalizedString subName = string.Empty;
             if (GameMain.gameSession.Submarine != null) subName = GameMain.gameSession.SubmarineInfo.DisplayName;
@@ -406,7 +406,6 @@ public partial class Plugin : IAssemblyPlugin
         }
         catch (Exception ex)
         {
-            DebugConsole.NewMessage("Error in UpdateMidroundPartySize()" + ex.Message, Color.Red);
             SetBaseParty();
             RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount());
         }
