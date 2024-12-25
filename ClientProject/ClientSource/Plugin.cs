@@ -839,6 +839,12 @@ public partial class Plugin : IAssemblyPlugin
                 { "vagabond", "vagabond"},
                 // Hunter's Husk
                 { "PlayerHuskJob", "huskjob"},
+                // Barotrauma 40K
+                {"magos", "magos"},
+                {"skitari", "skitari"},
+                {"sororitas", "sororitas"},
+                {"engineseer", "engineseer"},
+                {"guardsman","guardsman"}
             };
             if (moddedJobs.TryGetValue(Character.controlled.JobIdentifier.value, out var icon))
             {
@@ -873,33 +879,36 @@ public partial class Plugin : IAssemblyPlugin
                     _discordPresenceObject.Assets.LargeImageText = controlledCharacter.Info.Job.Name.ToString();
                     _discordPresenceObject.Assets.LargeImageKey = JobIcon();
 
-                    // PVP Check. Sets small icon to Coal/Jov and preserves missionlist(hopefully)
-                    foreach (var mission in GameMain.gameSession.missions)
-                        if (mission is CombatMission combatMission)
-                        {
-                            if (controlledCharacter.TeamID == CharacterTeamType.Team1)
+                    // PVP SmallIcon.
+                    if (GameMain.gameSession.GameMode is PvPMode)
+                    {
+                        foreach (var mission in GameMain.gameSession.missions)
+                            if (mission is CombatMission combatMission)
                             {
-                                _discordPresenceObject.Assets.SmallImageKey = "coalition";
-                                //Deathmatch doesn't seem to have a display name hence the extra if statement
                                 if (combatMission.winCondition == CombatMission.WinCondition.KillCount)
+                                {
                                     _discordPresenceObject.Assets.SmallImageText =
-                                        $"{CombatMission.teamNames[0]} | {TextManager.Get("missiontype.OutpostCombat")}";
+                                        $" | {TextManager.Get("missiontype.OutpostCombat")}";
+                                }
                                 else
-                                    _discordPresenceObject.Assets.SmallImageText =
-                                        $"{CombatMission.teamNames[0]} | {Getters.MissionList}";
+                                {
+                                    _discordPresenceObject.Assets.SmallImageText = $" | {Getters.MissionList}";
+                                }
                             }
-                            else if (controlledCharacter.TeamID == CharacterTeamType.Team2)
-                            {
-                                _discordPresenceObject.Assets.SmallImageKey = "jovian";
-                                if (combatMission.winCondition == CombatMission.WinCondition.KillCount)
-                                    _discordPresenceObject.Assets.SmallImageText =
-                                        $"{CombatMission.teamNames[1]} | {TextManager.Get("missiontype.OutpostCombat")}";
-                                else
-                                    _discordPresenceObject.Assets.SmallImageText =
-                                        $"{CombatMission.teamNames[1]} | {Getters.MissionList}";
-                            }
-                        }
 
+                        if (controlledCharacter.teamID == CharacterTeamType.Team1)
+                        {
+                            _discordPresenceObject.Assets.SmallImageKey = "coalition";
+                            _discordPresenceObject.Assets.SmallImageText =
+                                $"{CombatMission.teamNames[0]} {_discordPresenceObject.Assets.SmallImageText}";
+                        }
+                        else if (controlledCharacter.teamID == CharacterTeamType.Team2)
+                        {
+                            _discordPresenceObject.Assets.SmallImageKey = "jovian";
+                            _discordPresenceObject.Assets.SmallImageText =
+                                $"{CombatMission.teamNames[1]} {_discordPresenceObject.Assets.SmallImageText}";
+                        }
+                    }
                     UpdateRichPresence();
                 }
                 else
