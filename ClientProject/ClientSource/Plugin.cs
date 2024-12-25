@@ -844,7 +844,11 @@ public partial class Plugin : IAssemblyPlugin
                 {"skitari", "skitari"},
                 {"sororitas", "sororitas"},
                 {"engineseer", "engineseer"},
-                {"guardsman","guardsman"}
+                {"guardsman","guardsman"},
+                // Harlequin
+                {"harlequin", "harlequin"},
+                // Admiral
+                {"admiral", "admiral"}
             };
             if (moddedJobs.TryGetValue(Character.controlled.JobIdentifier.value, out var icon))
             {
