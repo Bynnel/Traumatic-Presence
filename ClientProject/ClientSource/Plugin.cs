@@ -26,7 +26,6 @@ public partial class Plugin : IAssemblyPlugin
 
     /*
      *  TODO:General long-term list of things that should be addressed:
-     *      Stabilise the sub editor,
      *      Find a workaround for the main menu (That's probably impossible though)
      *      Replace LuaCS hooks with harmony postfixes for longevity..?
      */
@@ -62,7 +61,17 @@ public partial class Plugin : IAssemblyPlugin
     {
         GameMain.LuaCs.Hook.Add("roundEnd", "rpcRoundEnded", args =>
         {
-            if (Getters.Biome() == String.Empty) return null; // Band-aid sub editor detection #2
+            // Band-aid sub editor fix #2. Now setting the whole status here.
+            if (Getters.Biome() == string.Empty) 
+            {
+                _discordPresenceObject.Details = string.Empty;
+                _discordPresenceObject.State = TextManager.Get("traumaticpresence.subeditorstatus")
+                    .Fallback("subeditorbutton").ToString();
+                _discordPresenceObject.Assets.LargeImageKey = "subeditor";
+                _discordPresenceObject.Assets.LargeImageText = string.Empty;
+                UpdateRichPresence();
+                return null;
+            }
             int casualtyCount = GameMain.gameSession.Casualties.Count();
             //Based off RoundSummary.cs
             LocalizedString subName = string.Empty;
@@ -182,7 +191,9 @@ public partial class Plugin : IAssemblyPlugin
             CheckRoundDetails(); //Checks if it's pve or pvp. Sets the rpc's details accordingly
             Getters.GetMissions();
 
-            _discordPresenceObject.State = $"{Getters.Gamemode()} ({Getters.GameType()})";
+            _discordPresenceObject.State = GameMain.IsSingleplayer && GameMain.gameSession.Campaign != null
+                ? Getters.Gamemode()
+                : $"{Getters.Gamemode()} ({Getters.GameType()})";
 
             _discordPresenceObject.Assets.SmallImageKey = Getters.MissionIcon();
             _discordPresenceObject.Assets.SmallImageText = Getters.MissionList;
@@ -313,8 +324,11 @@ public partial class Plugin : IAssemblyPlugin
         };
         //This doesn't seem like a bad place to set basic states from.
         if (Screen.Selected.IsEditor)
+        {
             _discordPresenceObject.State = TextManager.Get("traumaticpresence.subeditorstatus")
                 .Fallback("subeditorbutton", false).ToString();
+            _discordPresenceObject.Assets.LargeImageKey = "subeditor";
+        }
         else if (GameMain.IsMultiplayer)
             _discordPresenceObject.State = TextManager.Get("traumaticpresence.inserverlobby")
                 .Fallback(TextManager.Get("tabmenu.inlobby"), false).ToString();
@@ -430,7 +444,8 @@ public partial class Plugin : IAssemblyPlugin
             details = TextManager.GetWithVariables("traumaticpresence.AtOutpost",
                 ("[outpost]", GameMain.gameSession.RoundSummary.startLocation.DisplayName),
                 ("[biome]", Getters.Biome())).ToString();
-        else details = $"{Getters.MainSub()} | {Getters.Biome()}";
+        // Band-aid sub editor fix #3 (the conditional operator, not the whole else statement)
+        else details = Getters.Biome() == String.Empty ? TextManager.GetWithVariables("traumaticpresence.testingsub", ("[sub]", Getters.MainSub())).ToString() : $"{Getters.MainSub()} | {Getters.Biome()}";
         _discordPresenceObject.Details = details;
     }
 
@@ -549,9 +564,6 @@ public partial class Plugin : IAssemblyPlugin
         public static string MissionIcon()
         {
             if (MissionList != string.Empty) return "missionicon";
-#if DEBUG
-            DebugConsole.NewMessage("MissionList is empty. Returning empty.", Color.Cyan);
-#endif
             return string.Empty;
         }
 
@@ -559,18 +571,24 @@ public partial class Plugin : IAssemblyPlugin
         {
             return GameMain.gameSession.GameMode.Name.ToString();
         }
-
+        
         public static string MainSub()
         {
             return GameMain.gameSession.SubmarineInfo.DisplayName.ToString();
         }
 
+        /// <summary>
+        /// String that returns the biome in which the level is currently in.
+        /// Submarine editor detection heavily relies on this returning an empty string.
+        /// If it ever somehow returns empty outside the submarine editor - expect trouble.
+        /// </summary>
+        /// <returns>Level's biome</returns>
         public static string Biome()
         {
-            if (GameMain.gameSession.LevelData != null)
-                return GameMain.gameSession.LevelData.Biome.DisplayName.ToString();
-            //Temporary bandaid fix until I figure out how to detect the sub editor in a good way.
-            return string.Empty;
+            return GameMain.gameSession.LevelData != null ? GameMain.gameSession.LevelData.Biome.DisplayName.ToString() :
+                // Temporary bandaid fix until I figure out how to detect the sub editor in a good way.
+                // The line above this one is a lie. This did not end up being temporary.
+                string.Empty;
         }
 
         public static class MultiplayerData
@@ -876,12 +894,21 @@ public partial class Plugin : IAssemblyPlugin
         /// <param name="controlledCharacter"></param>
         public static void OnCharacterControlled(Character controlledCharacter)
         {
+            if (GameMain.GameScreen.IsEditor) return; // Band-aid sub editor fix #4 (doesn't seem to be effective)
             if (GameMain.gameSession != null && controlledCharacter != null)
             {
                 if (controlledCharacter.Info != null)
                 {
-                    _discordPresenceObject.Assets.LargeImageText = controlledCharacter.Info.Job.Name.ToString();
-                    _discordPresenceObject.Assets.LargeImageKey = JobIcon();
+                    if (SubEditorScreen.IsSubEditor())
+                    {
+                        _discordPresenceObject.Assets.LargeImageKey = "subeditor";
+                        _discordPresenceObject.Assets.LargeImageText = string.Empty;
+                    }
+                    else
+                    {
+                        _discordPresenceObject.Assets.LargeImageText = controlledCharacter.Info.Job.Name.ToString();
+                        _discordPresenceObject.Assets.LargeImageKey = JobIcon();
+                    }
 
                     // PVP SmallIcon.
                     if (GameMain.gameSession.GameMode is PvPMode)
