@@ -51,7 +51,7 @@ public partial class Plugin : IAssemblyPlugin
         SetBaseRPC();
         InitEventSubscriptions();
         InitLuaHooks();
-        DebugConsole.NewMessage("Traumatic Presence has been loaded", Color.DodgerBlue);
+        DebugConsole.NewMessage("Traumatic Presence has been loaded!", Color.DodgerBlue);
     }
 
     /// <summary>
@@ -139,15 +139,6 @@ public partial class Plugin : IAssemblyPlugin
                                     : "traumaticpresence.RoundSummaryReturn";
                             break;
                     }
-
-#if DEBUG
-                    DebugConsole.NewMessage(
-                        $"Campaign mode: Setting RPC Details to {textTag}, which is localized to {TextManager.Get(textTag)}",
-                        Color.DodgerBlue);
-                    DebugConsole.NewMessage(
-                        $"{TextManager.GetWithVariables(textTag, ("[sub]", subName), ("[location]", locationName))}",
-                        Color.DodgerBlue);
-#endif
                     
                     _discordPresenceObject.Details = casualtyCount > 0
                         ? TextManager
@@ -188,7 +179,7 @@ public partial class Plugin : IAssemblyPlugin
                     TextManager.Get("traumaticpresence.spectating").ToString();
             }
 
-            CheckRoundDetails(); //Checks if it's pve or pvp. Sets the rpc's details accordingly
+            CheckRoundDetails();
             Getters.GetMissions();
 
             _discordPresenceObject.State = GameMain.IsSingleplayer && GameMain.gameSession.Campaign != null
@@ -271,14 +262,7 @@ public partial class Plugin : IAssemblyPlugin
             {
                 if (isInitialized) return;
                 isInitialized = true;
-#if DEBUG
-                DebugConsole.NewMessage("AddToGUIUpdateList Called.", Color.DodgerBlue);
-#endif
                 InitLateHarmonyPatches();
-                //SetBaseParty();
-#if DEBUG
-                DebugConsole.NewMessage("Unpatching NetLobbyScreen.AddToGUIUpdateList", Color.OrangeRed);
-#endif
                 //Don't need it anymore.
                 harmony.Unpatch(typeof(NetLobbyScreen).GetMethod(nameof(NetLobbyScreen.AddToGUIUpdateList)),
                     HarmonyPatchType.Postfix);
@@ -313,7 +297,6 @@ public partial class Plugin : IAssemblyPlugin
                 SetBaseParty();
                 RpcClient.UpdateParty(_discordPartyObject);
                 _partySetForFirstTime = true;
-                DebugConsole.NewMessage("Initialized the god damn party", Color.DodgerBlue);
             }
         }
         UpdateMidroundPartySize();
@@ -372,10 +355,6 @@ public partial class Plugin : IAssemblyPlugin
                     Size = Getters.MultiplayerData.PlayerCount(),
                     Max = Getters.MultiplayerData.MaxPlayerCount()
                 };
-                DebugConsole.NewMessage($"ID {_discordPartyObject.ID}");
-                DebugConsole.NewMessage($"Privacy {_discordPartyObject.Privacy}");
-                DebugConsole.NewMessage($"Playercount {_discordPartyObject.Size}");
-                DebugConsole.NewMessage($"Max playercount {_discordPartyObject.Max}");
                 _discordPresenceObject.Party = _discordPartyObject;
                 try
                 {
@@ -560,9 +539,6 @@ public partial class Plugin : IAssemblyPlugin
             {
                 foreach (var mission in GameMain.gameSession.missions)
                 {
-#if DEBUG
-                    DebugConsole.NewMessage($"Iterated {mission} | {mission.Name}", Color.DodgerBlue);
-#endif
                     if (mission.Name.Length ==
                         0) // Prevents things like random pirate encounters from leaving a "," at the end
                         continue;
@@ -626,9 +602,6 @@ public partial class Plugin : IAssemblyPlugin
                 {
                     if (GameMain.Client.ServerSettings.maxPlayers == 0)
                     {
-#if DEBUG
-                        DebugConsole.NewMessage("MaxPlayerCount was called too early. Game's returning 0.");
-#endif
                         return GameMain.Client.ServerSettings.MaxPlayers;
                     }
 
@@ -647,16 +620,8 @@ public partial class Plugin : IAssemblyPlugin
             {
                 foreach (var endpoint in GameMain.Client.serverEndpoints)
                 {
-#if DEBUG
-                    DebugConsole.NewMessage($"Fetching endpoint {endpoint.Address}", Color.DeepSkyBlue);
-#endif
                     return endpoint.ToString();
                 }
-
-#if DEBUG
-                DebugConsole.NewMessage("No endpoint found. Does the server not exist? Falling back to empty",
-                    Color.OrangeRed);
-#endif
                 return string.Empty;
             }
 
@@ -727,9 +692,6 @@ public partial class Plugin : IAssemblyPlugin
             if (allBossBarsCompleted && !IsBossDealtWith)
             {
                 IsBossDealtWith = true;
-#if DEBUG
-                DebugConsole.NewMessage("Boss has either been killed or evaded(Interrupted).", Color.OrangeRed);
-#endif
                 CheckRoundDetails();
                 UpdateRichPresence();
             }
@@ -765,11 +727,6 @@ public partial class Plugin : IAssemblyPlugin
             foreach (var mission in GameMain.gameSession.missions)
                 if (mission is CombatMission combatMission)
                 {
-#if DEBUG
-                    DebugConsole.NewMessage(
-                        $"First & Last existing subs: {combatMission.subs.First().Info.DisplayName} | {combatMission.subs.Last().Info.DisplayName}",
-                        Color.MediumVioletRed);
-#endif
                     _discordPresenceObject.Details = TextManager.GetWithVariables("traumaticpresence.subvsub",
                             ("[sub1]", combatMission.subs.First().Info.DisplayName),
                             ("[sub2]", combatMission.subs.Last().Info.DisplayName))
@@ -791,15 +748,8 @@ public partial class Plugin : IAssemblyPlugin
 
         public static void RPC_OnCharacterKilled()
         {
-#if DEBUG
-            DebugConsole.NewMessage("Character killed", Color.DodgerBlue);
-#endif
             if (GameMain.Client.myCharacter == null || GameMain.Client.myCharacter.isDead)
             {
-#if DEBUG
-                DebugConsole.NewMessage($"Cause of death via textmanager: {TextManager.Get("CauseOfDeath")}",
-                    Color.DodgerBlue);
-#endif
                 _discordPresenceObject.Assets.LargeImageKey = "icon-dead";
                 _discordPresenceObject.Assets.LargeImageText = TextManager
                     .GetWithVariables("traumaticpresence.causeofdeath", ("[causeofdeath]", CauseOfDeath()))
@@ -845,12 +795,6 @@ public partial class Plugin : IAssemblyPlugin
             {
                 return basegameIcon;
             }
-
-#if DEBUG
-            DebugConsole.NewMessage("Job's not one of the standard ones. Checking if it's one of the known modded ones",
-                Color.BlueViolet);
-            DebugConsole.NewMessage($"Job Identifier is: {Character.controlled.JobIdentifier.Value}", Color.BlueViolet);
-#endif
             var moddedJobs = new Dictionary<string, string>
             {
                 // Some idents are renamed for consistency or because they differ a lot from their actual name
@@ -895,7 +839,7 @@ public partial class Plugin : IAssemblyPlugin
                 return icon;
             }
 
-            DebugConsole.NewMessage($"Couldn't find an icon for job ID {Character.controlled.JobIdentifier.value}. Falling back to generic icon.", Color.OrangeRed);
+            DebugConsole.NewMessage($"Couldn't find an icon for job ID {Character.controlled.JobIdentifier.value}. Falling back to the generic icon.", Color.OrangeRed);
             return "unknown-role";
         }
 
@@ -1002,9 +946,6 @@ public partial class Plugin : IAssemblyPlugin
             if (_TimerObject != null) _TimerObject.Dispose();
             _TimerObject = new System.Threading.Timer(_ =>
             {
-#if DEBUG
-                DebugConsole.NewMessage($"Action Timer firing. Calling method {method.Method}", Color.MediumVioletRed);
-#endif
                 method();
             }, null, delayMs, Timeout.Infinite);
         }
@@ -1018,9 +959,6 @@ public partial class Plugin : IAssemblyPlugin
             {
                 _TimerObject.Dispose();
                 _TimerObject = null;
-#if DEBUG
-                DebugConsole.NewMessage("Action Timer disposed", Color.MediumVioletRed);
-#endif
             }
         }
     }
