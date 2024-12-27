@@ -275,7 +275,7 @@ public partial class Plugin : IAssemblyPlugin
                 DebugConsole.NewMessage("AddToGUIUpdateList Called.", Color.DodgerBlue);
 #endif
                 InitLateHarmonyPatches();
-                SetBaseParty();
+                //SetBaseParty();
 #if DEBUG
                 DebugConsole.NewMessage("Unpatching NetLobbyScreen.AddToGUIUpdateList", Color.OrangeRed);
 #endif
@@ -299,8 +299,23 @@ public partial class Plugin : IAssemblyPlugin
         );
     }
 
+    private static bool _partySetForFirstTime = false;
+    /// <summary>
+    /// Calls SetBaseParty to start the party for the first time
+    /// Also updates the party whenever the player count changes.
+    /// </summary>
     public static void RPC_ClientListRead()
     {
+        if (!_partySetForFirstTime)
+        {
+            if (Getters.MultiplayerData.PlayerCount() != 0)
+            {
+                SetBaseParty();
+                RpcClient.UpdateParty(_discordPartyObject);
+                _partySetForFirstTime = true;
+                DebugConsole.NewMessage("Initialized the god damn party", Color.DodgerBlue);
+            }
+        }
         UpdateMidroundPartySize();
     }
 
@@ -340,7 +355,8 @@ public partial class Plugin : IAssemblyPlugin
     }
 
     /// <summary>
-    ///     Absolutely miserable solution to parties.
+    ///     Sets the base party object that has the info.
+    ///     Has a tendency to not get set while loaidng.
     /// </summary>
     public static void SetBaseParty()
     {
@@ -356,6 +372,10 @@ public partial class Plugin : IAssemblyPlugin
                     Size = Getters.MultiplayerData.PlayerCount(),
                     Max = Getters.MultiplayerData.MaxPlayerCount()
                 };
+                DebugConsole.NewMessage($"ID {_discordPartyObject.ID}");
+                DebugConsole.NewMessage($"Privacy {_discordPartyObject.Privacy}");
+                DebugConsole.NewMessage($"Playercount {_discordPartyObject.Size}");
+                DebugConsole.NewMessage($"Max playercount {_discordPartyObject.Max}");
                 _discordPresenceObject.Party = _discordPartyObject;
                 try
                 {
@@ -363,7 +383,9 @@ public partial class Plugin : IAssemblyPlugin
                 }
                 catch
                 {
+                    RpcClient = new DiscordRpcClient("1274111447323906088");
                     RpcClient.Initialize();
+                    _discordPresenceObject.Party = _discordPartyObject;
                     RpcClient.UpdateParty(_discordPartyObject);
                 }
             }
