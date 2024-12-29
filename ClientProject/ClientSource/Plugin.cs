@@ -290,16 +290,16 @@ public partial class Plugin : IAssemblyPlugin
     /// </summary>
     public static void RPC_ClientListRead()
     {
-        if (!_partySetForFirstTime)
+        if (Getters.MultiplayerData.MaxPlayerCount() >= Getters.MultiplayerData.PlayerCount())
         {
-            if (Getters.MultiplayerData.PlayerCount() != 0)
+            if (!_partySetForFirstTime)
             {
                 SetBaseParty();
                 RpcClient.UpdateParty(_discordPartyObject);
                 _partySetForFirstTime = true;
             }
+            UpdateMidroundPartySize();
         }
-        UpdateMidroundPartySize();
     }
 
     public static void InitEventSubscriptions()
@@ -386,7 +386,7 @@ public partial class Plugin : IAssemblyPlugin
             _discordPresenceObject.State = _discordPresenceObject.State.Substring(0, 125) + "...";
         }
 
-        if (_discordPresenceObject.Party != null && _discordPresenceObject.Party.Max < Getters.MultiplayerData.PlayerCount())
+        if (GameMain.IsMultiplayer && _discordPresenceObject.Party != null && _discordPresenceObject.Party.Max < Getters.MultiplayerData.PlayerCount())
         {
             DebugConsole.NewMessage("Can't get proper max player count right now. Setting it to the current player count.", Color.OrangeRed);
             _discordPresenceObject.Party.Max = Getters.MultiplayerData.PlayerCount();
@@ -402,6 +402,13 @@ public partial class Plugin : IAssemblyPlugin
                 $"An error occured while trying to update Rich Presence: \n {ex.Message} \n Recreating RPC in hopes of fixing it.",
                 Color.Red);
             RpcClient = new DiscordRpcClient("1274111447323906088");
+            // Yes, there's an identical check right above this code but according to comments the exact same issue still happens
+            // So I'll just duplicate this check again in hopes of finally shutting that issue up. Will probably be removed later, I'll even mark it with a TODO: !
+            if (GameMain.IsMultiplayer && _discordPresenceObject.Party != null && _discordPresenceObject.Party.Max < Getters.MultiplayerData.PlayerCount())
+            {
+                DebugConsole.NewMessage("Can't get proper max player count right now. Setting it to the current player count.", Color.OrangeRed);
+                _discordPresenceObject.Party.Max = Getters.MultiplayerData.PlayerCount();
+            }
             RpcClient.SetPresence(_discordPresenceObject);
         }
         //SteamPresence.SetSteamPresence(_discordPresenceObject.Details); //This most likely won't do anything.
@@ -430,7 +437,7 @@ public partial class Plugin : IAssemblyPlugin
             {
                 RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount(), Getters.MultiplayerData.PlayerCount());
             }
-            else RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount());
+            else RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount(), Getters.MultiplayerData.MaxPlayerCount());
         }
     }
 
