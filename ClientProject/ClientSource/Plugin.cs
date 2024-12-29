@@ -437,7 +437,7 @@ public partial class Plugin : IAssemblyPlugin
             {
                 RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount(), Getters.MultiplayerData.PlayerCount());
             }
-            else RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount());
+            else RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount(), Getters.MultiplayerData.MaxPlayerCount());
         }
     }
 
