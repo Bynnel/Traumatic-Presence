@@ -387,11 +387,6 @@ public partial class Plugin : IAssemblyPlugin
             _discordPresenceObject.State = _discordPresenceObject.State.Substring(0, 125) + "...";
         }
 
-        if (_discordPartyObject.Max < Getters.MultiplayerData.PlayerCount())
-        {
-            _discordPartyObject.Max = Getters.MultiplayerData.PlayerCount();
-        }
-
         try
         {
             RpcClient.SetPresence(_discordPresenceObject);
@@ -605,10 +600,9 @@ public partial class Plugin : IAssemblyPlugin
             {
                 if (_SteamP2PLobbyObject.Id != 0) return _SteamP2PLobbyObject.MaxMembers - 10;
                 {
-                    if (GameMain.Client.ServerSettings.maxPlayers < PlayerCount())
+                    if (GameMain.Client.ServerSettings.maxPlayers == 0)
                     {
-                        DebugConsole.NewMessage("Couldn't fetch max player count as the game has returned zero. Setting it to the current player count to avoid exceptions", Color.OrangeRed);
-                        return PlayerCount();
+                        return GameMain.Client.ServerSettings.MaxPlayers;
                     }
 
                     return GameMain.Client.ServerSettings.MaxPlayers;
