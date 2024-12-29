@@ -339,7 +339,7 @@ public partial class Plugin : IAssemblyPlugin
 
     /// <summary>
     ///     Sets the base party object that has the info.
-    ///     Has a tendency to not get set while loaidng.
+    ///     Has a tendency to not get set while loading.
     /// </summary>
     public static void SetBaseParty()
     {
@@ -347,7 +347,6 @@ public partial class Plugin : IAssemblyPlugin
         {
             if (GameMain.Client.ServerSettings.maxPlayers != 0)
             {
-                Timer.Dispose();
                 _discordPartyObject = new Party
                 {
                     ID = Getters.MultiplayerData.ServerEndpoint(),
@@ -387,6 +386,12 @@ public partial class Plugin : IAssemblyPlugin
             _discordPresenceObject.State = _discordPresenceObject.State.Substring(0, 125) + "...";
         }
 
+        if (_discordPresenceObject.Party != null && _discordPresenceObject.Party.Max < Getters.MultiplayerData.PlayerCount())
+        {
+            DebugConsole.NewMessage("Can't get proper max player count right now. Setting it to the current player count.", Color.OrangeRed);
+            _discordPresenceObject.Party.Max = Getters.MultiplayerData.PlayerCount();
+        }
+
         try
         {
             RpcClient.SetPresence(_discordPresenceObject);
@@ -421,7 +426,11 @@ public partial class Plugin : IAssemblyPlugin
         catch (Exception ex)
         {
             SetBaseParty();
-            RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount());
+            if (Getters.MultiplayerData.PlayerCount() > Getters.MultiplayerData.MaxPlayerCount())
+            {
+                RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount(), Getters.MultiplayerData.PlayerCount());
+            }
+            else RpcClient.UpdatePartySize(Getters.MultiplayerData.PlayerCount());
         }
     }
 
@@ -602,6 +611,7 @@ public partial class Plugin : IAssemblyPlugin
                 {
                     if (GameMain.Client.ServerSettings.maxPlayers == 0)
                     {
+                        // TODO: Come up with a solution whenever baro decides to return 0
                         return GameMain.Client.ServerSettings.MaxPlayers;
                     }
 
