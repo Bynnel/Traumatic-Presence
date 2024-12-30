@@ -1,4 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<contentpackage name="Traumatic Presence" modversion="1.0.4" corepackage="False" steamworkshopid="3393519245" gameversion="1.7.7.0">
+<contentpackage name="Traumatic Presence" modversion="1.0.5" corepackage="False" steamworkshopid="3393519245" gameversion="1.7.7.0">
   <Text file="%ModDir%/Content/Texts/English.xml" />
 </contentpackage>
