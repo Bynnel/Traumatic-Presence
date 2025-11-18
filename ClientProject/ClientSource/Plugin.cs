@@ -386,6 +386,17 @@ public partial class Plugin : IAssemblyPlugin
             _discordPresenceObject.State = _discordPresenceObject.State.Substring(0, 125) + "...";
         }
 
+        if (_discordPresenceObject.Assets.SmallImageText is { Length: > 128 })
+        {
+            _discordPresenceObject.Assets.SmallImageText = _discordPresenceObject.Assets.SmallImageText.Substring(0, 125) + "...";
+        }
+
+        if (_discordPresenceObject.Assets.LargeImageText is { Length: > 128 })
+        {
+            _discordPresenceObject.Assets.LargeImageText = _discordPresenceObject.Assets.LargeImageText.Substring(0, 125) + "...";
+        }
+        // The DiscordRPC library added length validation back in October 2024... Any other cases should hopefully be caught by that, just without appending "..." instead of the last 3 chars.
+
         if (GameMain.IsMultiplayer && _discordPresenceObject.Party != null && _discordPresenceObject.Party.Max < Getters.MultiplayerData.PlayerCount())
         {
             DebugConsole.NewMessage("Can't get proper max player count right now. Setting it to the current player count.", Color.OrangeRed);

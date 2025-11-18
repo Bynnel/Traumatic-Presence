@@ -25,6 +25,6 @@ public partial class Plugin : IAssemblyPlugin
     {
         RpcClient.Dispose();
         Timer.Dispose();
-        harmony.UnpatchAll("lenny.barotrauma.traumaticpresence");
+        harmony.UnpatchSelf();
     }
 }
