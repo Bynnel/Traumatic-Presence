@@ -1,5 +1,5 @@
-﻿namespace TraumaticPresence;
-using HarmonyLib;
+﻿using HarmonyLib;
+namespace TraumaticPresence
 {
     public partial class Plugin : IAssemblyPlugin
     {
