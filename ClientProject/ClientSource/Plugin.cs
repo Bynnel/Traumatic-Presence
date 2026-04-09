@@ -55,7 +55,7 @@ public partial class Plugin : IAssemblyPlugin
     /// </summary>
     public static void InitLuaHooks()
     {
-        GameMain.LuaCs.Hook.Add("roundEnd", "rpcRoundEnded", args =>
+        LuaCsSetup.Instance.Hook.Add("roundEnd", "rpcRoundEnded", args =>
         {
             // Band-aid sub editor fix #2. Now setting the whole status here.
             if (Getters.Biome() == string.Empty) 
@@ -166,7 +166,7 @@ public partial class Plugin : IAssemblyPlugin
             UpdateRichPresence();
             return null;
         });
-        GameMain.LuaCs.Hook.Add("roundStart", "rpcRoundStarted", args =>
+        LuaCsSetup.Instance.Hook.Add("roundStart", "rpcRoundStarted", args =>
         {
             if (Character.Controlled == null)
             {
@@ -866,7 +866,7 @@ public partial class Plugin : IAssemblyPlugin
             DebugConsole.NewMessage($"Couldn't find an icon for job ID {Character.controlled.JobIdentifier.value}. Falling back to the generic icon.", Color.OrangeRed);
             return "unknown-role";
         }
-
+        
         /// <summary>
         ///     Method called by the harmony hook. This initializes the character stuff.
         /// </summary>
