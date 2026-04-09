@@ -10,10 +10,6 @@ using Steamworks.Data;
 using static Barotrauma.CharacterHUD;
 using Color = Microsoft.Xna.Framework.Color;
 
-[assembly: IgnoresAccessChecksTo("Barotrauma")]
-[assembly: IgnoresAccessChecksTo("BarotraumaCore")]
-[assembly: IgnoresAccessChecksTo("DedicatedServer")]
-
 namespace TraumaticPresence;
 
 public partial class Plugin : IAssemblyPlugin

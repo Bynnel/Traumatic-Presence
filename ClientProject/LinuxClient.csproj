@@ -1,86 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
-    <Import Project="..\SharedProject\SharedProject.projitems" Label="Shared" />
-    <Import Project="../Build.props" />
-
-    <PropertyGroup>
-        <RootNamespace>$(SolutionName.Replace(" ", "_"))</RootNamespace>
-        <PlatformTarget>x64</PlatformTarget>
-        <GenerateDocumentationFile>False</GenerateDocumentationFile>
-        <AssemblyName>TraumaticPresence</AssemblyName>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DefineConstants>TRACE;CLIENT;LINUX</DefineConstants>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DefineConstants>TRACE;CLIENT;LINUX</DefineConstants>
-    </PropertyGroup>
-
     <ItemGroup>
-      <Reference Include="DiscordRPC">
-        <HintPath>..\..\DiscordRPC.dll</HintPath>
-      </Reference>
-      <Reference Include="0Harmony">
-        <HintPath>..\Refs\0Harmony.dll</HintPath>
-      </Reference>
       <Reference Include="Barotrauma">
         <HintPath>..\Refs\Linux\Barotrauma.dll</HintPath>
       </Reference>
       <Reference Include="BarotraumaCore">
         <HintPath>..\Refs\Linux\BarotraumaCore.dll</HintPath>
       </Reference>
+      <Reference Include="DiscordRPC">
+        <HintPath>..\Assets\Libraries\DiscordRPC.dll</HintPath>
+      </Reference>
       <Reference Include="Facepunch.Steamworks.Win64">
         <HintPath>..\Refs\Facepunch.Steamworks.Win64.dll</HintPath>
-      </Reference>
-      <Reference Include="Farseer.NetStandard">
-        <HintPath>..\Refs\Farseer.NetStandard.dll</HintPath>
-      </Reference>
-      <Reference Include="Lidgren.NetStandard">
-        <HintPath>..\Refs\Lidgren.NetStandard.dll</HintPath>
-      </Reference>
-      <Reference Include="Mono.Cecil">
-        <HintPath>..\Refs\Mono.Cecil.dll</HintPath>
       </Reference>
       <Reference Include="MonoGame.Framework.Linux.NetStandard">
         <HintPath>..\Refs\MonoGame.Framework.Linux.NetStandard.dll</HintPath>
       </Reference>
-      <Reference Include="MonoGame.Framework.MacOS.NetStandard">
-        <HintPath>..\Refs\MonoGame.Framework.MacOS.NetStandard.dll</HintPath>
-      </Reference>
-      <Reference Include="MonoGame.Framework.Windows.NetStandard">
-        <HintPath>..\Refs\MonoGame.Framework.Windows.NetStandard.dll</HintPath>
-      </Reference>
-      <Reference Include="MonoMod.Backports">
-        <HintPath>..\Refs\MonoMod.Backports.dll</HintPath>
-      </Reference>
-      <Reference Include="MonoMod.Iced">
-        <HintPath>..\Refs\MonoMod.Iced.dll</HintPath>
-      </Reference>
-      <Reference Include="MonoMod.ILHelpers">
-        <HintPath>..\Refs\MonoMod.ILHelpers.dll</HintPath>
-      </Reference>
-      <Reference Include="MonoMod.RuntimeDetour">
-        <HintPath>..\Refs\MonoMod.RuntimeDetour.dll</HintPath>
-      </Reference>
-      <Reference Include="MonoMod.Utils">
-        <HintPath>..\Refs\MonoMod.Utils.dll</HintPath>
-      </Reference>
-      <Reference Include="MoonSharp.Interpreter">
-        <HintPath>..\Refs\MoonSharp.Interpreter.dll</HintPath>
-      </Reference>
-      <Reference Include="XNATypes">
-        <HintPath>..\Refs\XNATypes.dll</HintPath>
-      </Reference>
     </ItemGroup>
-
+    
+    <Import Project="..\SharedProject\SharedProject.projitems" Label="Shared" />
+    <Import Project="../Build.props"/>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACE;CLIENT;LINUX</DefineConstants>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DefineConstants>TRACE;CLIENT;LINUX</DefineConstants>
+    </PropertyGroup>
+    
     <Target Name="CopyFiles" AfterTargets="Build">
         <ItemGroup>
             <Assemblies Include="$(TargetDir)$(TargetName).dll" />
@@ -89,5 +36,4 @@
         <Copy SourceFiles="@(Assemblies)" DestinationFiles="$(ModDeployDir)bin\Client\Linux\$(TargetName).dll" />
         <Copy SourceFiles="@(DepsFiles)" DestinationFiles="$(ModDeployDir)bin\Client\Linux\$(TargetName).deps.json" />
     </Target>
-    
 </Project>

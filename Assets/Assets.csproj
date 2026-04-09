@@ -1,31 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>ModAssets</RootNamespace>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <Import Project="../Build.props"/>
 
-    <ItemGroup>
-      <Folder Include="Content" />
-    </ItemGroup>
-
     <Target Name="CopyFiles" AfterTargets="Build">
         <ItemGroup>
-            <FileList Include="$(ProjectDir)filelist.xml" />
-            <RunConfig Include="$(ProjectDir)RunConfig.xml" />
             <Content Include="$(ProjectDir)Content\**\*.*" />
-            <Libraries Include="$(ProjectDir)Libraries\*.*" />
         </ItemGroup>
-        <Copy SourceFiles="@(FileList)" DestinationFiles="$(ModDeployDir)filelist.xml" />
-        <Copy SourceFiles="@(RunConfig)" DestinationFiles="$(ModDeployDir)CSharp\RunConfig.xml" />
-        <Copy SourceFiles="@(Content)" DestinationFolder="$(ModDeployDir)Content\%(RecursiveDir)" />
-        <Copy SourceFiles="@(Libraries)" DestinationFolder="$(ModDeployDir)bin\Client\Windows"/>
-        <Copy SourceFiles="@(Libraries)" DestinationFolder="$(ModDeployDir)bin\Client\Linux"/>
-        <Copy SourceFiles="@(Libraries)" DestinationFolder="$(ModDeployDir)bin\Client\OSX"/>
+        <Copy SourceFiles="@(Content)" DestinationFolder="$(ModDeployDir)%(RecursiveDir)" />
     </Target>
 
 

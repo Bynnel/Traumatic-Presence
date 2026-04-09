@@ -1,12 +1,8 @@
 {
   "profiles": {
-    "WindowsClient": {
-      "commandName": "Project",
-      "workingDirectory": "E:\\BarotraumaModding\\LuaCsForBarotrauma\\Barotrauma\\bin\\DebugWindows\\net8.0"
-    },
-    "Profile 1": {
+    "Launch Barotrauma": {
       "commandName": "Executable",
-      "executablePath": "E:\\BarotraumaModding\\LuaCsForBarotrauma\\Barotrauma\\bin\\DebugWindows\\net8.0\\Barotrauma.exe"
+      "executablePath": "$(ModDeployDir)\\..\\..\\Barotrauma.exe"
     }
   }
 }
