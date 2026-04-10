@@ -9,8 +9,9 @@
     <Reference Include="DiscordRPC">
       <HintPath>..\Assets\Libraries\DiscordRPC.dll</HintPath>
     </Reference>
-    <Reference Include="Facepunch.Steamworks.Win64">
-      <HintPath>..\Refs\Facepunch.Steamworks.Win64.dll</HintPath>
+    <Reference Include="Facepunch.Steamworks.Posix64">
+      <HintPath>..\Refs\Facepunch.Steamworks.Posix64.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoGame.Framework.MacOS.NetStandard">
       <HintPath>..\Refs\MonoGame.Framework.MacOS.NetStandard.dll</HintPath>

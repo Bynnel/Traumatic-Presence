@@ -24,6 +24,7 @@
     </Reference>
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>..\Refs\Facepunch.Steamworks.Win64.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoGame.Framework.Windows.NetStandard">
       <HintPath>..\Refs\MonoGame.Framework.Windows.NetStandard.dll</HintPath>
