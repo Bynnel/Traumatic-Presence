@@ -5,7 +5,8 @@
     <Assembly File="%ModDir%/bin/Client/Windows/TraumaticPresence.dll" Target="Client" Platform="Windows"/>
     <Assembly File="%ModDir%/Libraries/DiscordRPC.dll" Target="Client" Platform="Any"/>
     <Assembly File="%ModDir%/Libraries/Newtonsoft.Json.dll" Target="Client" Platform="Any"/>
-    <Assembly File="%ModDir%/Libraries/Facepunch.Steamworks.Win64.dll" Target="Client" Platform="Windows"/>
+    <!-- Despite the OSX/Linux projects specifically using Posix64 as reference, the mod still begs for the win64 binary in-game so i guess i will have to set the platform to Any. -->
+    <Assembly File="%ModDir%/Libraries/Facepunch.Steamworks.Win64.dll" Target="Client" Platform="Any"/>
     <Assembly File="%ModDir%/Libraries/Facepunch.Steamworks.Posix64.dll" Target="Client" Platform="Linux"/>
     <Assembly File="%ModDir%/Libraries/Facepunch.Steamworks.Posix64.dll" Target="Client" Platform="OSX"/>
 
