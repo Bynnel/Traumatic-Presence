@@ -20,7 +20,7 @@
       <HintPath>..\Refs\Windows\BarotraumaCore.dll</HintPath>
     </Reference>
     <Reference Include="DiscordRPC">
-      <HintPath>..\Assets\Libraries\DiscordRPC.dll</HintPath>
+      <HintPath>..\Assets\Content\Libraries\DiscordRPC.dll</HintPath>
     </Reference>
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>..\Refs\Facepunch.Steamworks.Win64.dll</HintPath>
